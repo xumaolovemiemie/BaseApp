@@ -15,8 +15,8 @@ import com.wisdom.rxjava.utils.StatusBarUtil;
 import com.wisdom.rxjava.widget.loading.WisdomLoading;
 import com.wisdom.rxjava.widget.swipeback.SwipeBackActivityHelper;
 
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created by wisdom on 17/3/31.
@@ -31,9 +31,9 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
     protected float mScreenDensity = 0.0f;
 
     protected BaseActivity mActivity = null;
-    protected CompositeSubscription mCompositeSubscription;
     protected WisdomLoading wisdomLoading;
     private SwipeBackActivityHelper mHelper;
+    private CompositeDisposable mDisposable;
 
     protected T b;
 
@@ -49,6 +49,7 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
             getIntentUrl(uri);
         }
         mActivity = this;
+        mDisposable = new CompositeDisposable();
         TAG_LOG = this.getClass().getSimpleName();
         BaseAppManager.getInstance().addActivity(this);
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -67,6 +68,11 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
         initViews();
         initData();
         setListener();
+    }
+
+
+    public void addDisposable(Disposable d){
+        mDisposable.add(d);
     }
 
     public void getIntentUrl(Uri uri) {
@@ -190,26 +196,14 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
         }
     }
 
-    public void addSubscription(Subscription s) {
-        if (this.mCompositeSubscription == null) {
-            this.mCompositeSubscription = new CompositeSubscription();
-        }
-
-        this.mCompositeSubscription.add(s);
-    }
 
     @Override
     protected void onStop() {
+        if (mDisposable!=null){
+            mDisposable.clear();
+        }
         super.onStop();
         hideIndeterminateProgressDialog();
-        try {
-            if (this.mCompositeSubscription != null) {
-                this.mCompositeSubscription.unsubscribe();
-                this.mCompositeSubscription = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

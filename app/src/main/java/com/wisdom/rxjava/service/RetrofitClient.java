@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
-import okhttp3.CacheControl;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -22,7 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -48,7 +47,7 @@ public class RetrofitClient {
         String baseUrl = "https://m.xiaolumeimei.com";
         return new Retrofit.Builder().baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(mOkHttpClient)
             .build();
     }
@@ -67,34 +66,34 @@ public class RetrofitClient {
                         .cache(cache)
                         .addInterceptor(chain -> {
                             Request request = chain.request();
-                            if (WisdomUtils.isNetWorkAvilable()) {
-                                request = request.newBuilder()
-                                    .header("User-Agent", "Android/" + Build.VERSION.RELEASE + " xlmmApp/"
-                                        + String.valueOf(BuildConfig.VERSION_CODE) + " Mobile/"
-                                        + Build.MODEL + " NetType/" + WisdomUtils.getNetType())
-                                    .build();
-                            } else {
-                                request = request.newBuilder()
-                                    .cacheControl(CacheControl.FORCE_CACHE)
-                                    .header("User-Agent", "Android/" + Build.VERSION.RELEASE + " xlmmApp/"
-                                        + String.valueOf(BuildConfig.VERSION_CODE) + " Mobile/"
-                                        + Build.MODEL + " NetType/" + WisdomUtils.getNetType())
-                                    .build();
-                            }
-                            okhttp3.Response response = chain.proceed(request);
-                            if (WisdomUtils.isNetWorkAvilable()) {
-                                int maxAge = 60 * 60;
-                                response.newBuilder()
-                                    .removeHeader("Pragma")
-                                    .header("Cache-Control", "public, max-age=" + maxAge)
-                                    .build();
-                            } else {
-                                int maxStale = 60 * 60 * 24 * 28;
-                                response.newBuilder()
-                                    .removeHeader("Pragma")
-                                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                                    .build();
-                            }
+//                            if (WisdomUtils.isNetWorkAvilable()) {
+                            request = request.newBuilder()
+                                .header("User-Agent", "Android/" + Build.VERSION.RELEASE + " xlmmApp/"
+                                    + String.valueOf(BuildConfig.VERSION_CODE) + " Mobile/"
+                                    + Build.MODEL + " NetType/" + WisdomUtils.getNetType())
+                                .build();
+//                            } else {
+//                                request = request.newBuilder()
+//                                    .cacheControl(CacheControl.FORCE_CACHE)
+//                                    .header("User-Agent", "Android/" + Build.VERSION.RELEASE + " xlmmApp/"
+//                                        + String.valueOf(BuildConfig.VERSION_CODE) + " Mobile/"
+//                                        + Build.MODEL + " NetType/" + WisdomUtils.getNetType())
+//                                    .build();
+//                            }
+//                            okhttp3.Response response = chain.proceed(request);
+//                            if (WisdomUtils.isNetWorkAvilable()) {
+//                                int maxAge = 60 * 60;
+//                                response.newBuilder()
+//                                    .removeHeader("Pragma")
+//                                    .header("Cache-Control", "public, max-age=" + maxAge)
+//                                    .build();
+//                            } else {
+//                                int maxStale = 60 * 60 * 24 * 28;
+//                                response.newBuilder()
+//                                    .removeHeader("Pragma")
+//                                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+//                                    .build();
+//                            }
                             return chain.proceed(request);
                         })
                         .cookieJar(new CookieJar() {

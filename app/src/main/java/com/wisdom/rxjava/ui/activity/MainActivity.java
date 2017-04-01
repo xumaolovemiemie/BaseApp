@@ -19,28 +19,28 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         b.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         adapter = new ActivityAdapter(mActivity);
         b.recyclerView.setAdapter(adapter);
+        b.btn.setOnClickListener(v -> readyGo(TestActivity.class));
     }
 
     @Override
     protected void initData() {
-        showIndeterminateProgressDialog(false);
-        addSubscription(ActivityModule.getInstance()
+        ActivityModule.getInstance()
             .getPortalBean("categorys,posters")
-            .subscribe(new CustomSubscriber<PortalBean>() {
+            .subscribe(new CustomSubscriber<PortalBean>(mActivity) {
                 @Override
                 public void onNext(PortalBean portalBean) {
+                    hideIndeterminateProgressDialog();
                     if (portalBean != null && portalBean.getActivitys() != null) {
                         adapter.update(portalBean.getActivitys());
                     }
-                    hideIndeterminateProgressDialog();
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    e.printStackTrace();
                     hideIndeterminateProgressDialog();
+                    e.printStackTrace();
                 }
-            }));
+            });
     }
 
     @Override

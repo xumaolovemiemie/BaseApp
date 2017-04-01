@@ -1,20 +1,35 @@
 package com.wisdom.rxjava.utils;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.ObservableTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by wisdom on 17/3/31.
  */
 
-public class DefaultTransform<T> implements Observable.Transformer<T, T> {
+public class DefaultTransform<T> implements ObservableTransformer<T, T> {
+    private int count = 0;
+
     @Override
-    public Observable<T> call(Observable<T> tObservable) {
-        return tObservable
+    public ObservableSource<T> apply(@NonNull Observable<T> upstream) {
+        return upstream
             .doOnError(throwable -> WisdomUtils.Log(throwable.getLocalizedMessage()))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread(), true)
-            .retryWhen(new RxUtils.RetryWhenNoInternet(2, 2000));
+            .retryWhen(throwableObservable ->
+                throwableObservable.flatMap((Function<Throwable, ObservableSource<?>>) throwable -> {
+                    if (count++ <= 3 && !WisdomUtils.isNetWorkAvilable()) {
+                        return Observable.timer(2000, TimeUnit.MILLISECONDS);
+                    }
+                    return Observable.error(throwable);
+                }));
     }
 }
