@@ -1,6 +1,6 @@
 package com.wisdom.rxjava.service;
 
-import com.wisdom.rxjava.base.BaseActivity;
+import com.wisdom.rxjava.base.BaseSubscriberContext;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -10,15 +10,15 @@ import io.reactivex.disposables.Disposable;
  */
 
 public class CustomSubscriber<T> implements Observer<T> {
-    private BaseActivity activity;
+    private BaseSubscriberContext context;
 
-    protected CustomSubscriber(BaseActivity activity) {
-        this.activity = activity;
+    protected CustomSubscriber(BaseSubscriberContext context) {
+        this.context = context;
     }
 
     @Override
     public void onSubscribe(Disposable d) {
-        activity.addDisposable(d);
+        context.addDisposable(d);
     }
 
     @Override

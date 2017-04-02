@@ -16,6 +16,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     @Override
     protected void initViews() {
+        setSwipeBackEnable(false);
         b.recyclerView.setLayoutManager(new LinearLayoutManager(mActivity));
         adapter = new ActivityAdapter(mActivity);
         b.recyclerView.setAdapter(adapter);
@@ -24,6 +25,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     @Override
     protected void initData() {
+        showIndeterminateProgressDialog(false);
+        setDialogContent("主页数据加载中");
         ActivityModule.getInstance()
             .getPortalBean("categorys,posters")
             .subscribe(new CustomSubscriber<PortalBean>(mActivity) {

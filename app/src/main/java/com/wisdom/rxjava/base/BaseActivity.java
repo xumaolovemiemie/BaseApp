@@ -22,7 +22,7 @@ import io.reactivex.disposables.Disposable;
  * Created by wisdom on 17/3/31.
  */
 
-public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatActivity {
+public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatActivity implements BaseSubscriberContext {
 
     protected static String TAG_LOG = null;
 
@@ -49,7 +49,6 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
             getIntentUrl(uri);
         }
         mActivity = this;
-        mDisposable = new CompositeDisposable();
         TAG_LOG = this.getClass().getSimpleName();
         BaseAppManager.getInstance().addActivity(this);
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -70,8 +69,11 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
         setListener();
     }
 
-
-    public void addDisposable(Disposable d){
+    @Override
+    public void addDisposable(Disposable d) {
+        if (mDisposable == null) {
+            mDisposable = new CompositeDisposable();
+        }
         mDisposable.add(d);
     }
 
@@ -196,11 +198,11 @@ public abstract class BaseActivity<T extends ViewDataBinding> extends AppCompatA
         }
     }
 
-
     @Override
     protected void onStop() {
-        if (mDisposable!=null){
+        if (mDisposable != null) {
             mDisposable.clear();
+            mDisposable = null;
         }
         super.onStop();
         hideIndeterminateProgressDialog();
